@@ -3,23 +3,19 @@ import React from 'react';
 import { render } from 'react-dom';
 
 class App extends React.Component {
-  constructor(){
-    super()
-    this.state = {
-      status: {
-        off: true,
-        work: false,
-        rest: false
-      },
-      time: 0,
-      timer: null
-    }
+  
+  state = {
+    status: 0,
+    time: 0,
+    timer: null
   }
+  
+  statuses = { off: 0, work: 1, rest: 2 }
 
   imgRender = () => {
-    if(this.state.status.work){
+    if(this.state.status === this.statuses.work){
       return <img src="./images/work.png" />
-    }else if(this.state.status.rest){
+    }else if(this.state.status === this.statuses.rest){
       return <img src="./images/rest.png" />
     }
   }
@@ -38,29 +34,23 @@ class App extends React.Component {
       time: secondsLeft,
     });
 
-    const status = this.state.status;
+    const { status } = this.state;
 
     if(secondsLeft < 1){
 
-      if(status.work){
+      if(status === this.statuses.work){
         this.playBell();
 
         this.setState({
           time: 20,
-          status: {
-            work: false,
-            rest: true
-          }
+          status: this.statuses.rest
         })
-      }else if(status.rest){
+      }else if(status === this.statuses.rest){
         this.playBell();
 
         this.setState({
           time: 1200,
-          status: {
-            work: true,
-            rest: false
-          }
+          status: this.statuses.work
         })
       }
     }
@@ -70,9 +60,7 @@ class App extends React.Component {
     this.setState({
       timer: setInterval(this.step, 1000),
       time: 5,
-      status: {
-        work: true
-      }
+      status: this.statuses.work
     });
   }
 
@@ -80,16 +68,14 @@ class App extends React.Component {
     clearInterval(this.state.timer);
     this.setState({
       time: 0,
-      status: {
-        off: true,
-        work: false,
-        rest: false
-      }
+      status: this.statuses.off
     });
   }
 
-  buttonRender = (button) => {
-    if(button === 'start'){
+  buttonRender = () => {
+    const { status } = this.state;
+
+    if(status === this.statuses.off){
       return <button className="btn" onClick={() => this.startTimer()}>Start</button>
     }else{
       return <button className="btn" onClick={() => this.stopTimer()}>Stop</button>
@@ -116,17 +102,17 @@ class App extends React.Component {
   }
 
   render() {
-    const status = this.state.status;
+    const { status } = this.state;
 
     return (
       <div>
         <h1>Protect your eyes</h1>
-        {status.off && this.appInfo()}
+        {status === this.statuses.off && this.appInfo()}
         {this.imgRender()}
         <div className="timer">
-        {!status.off && this.formatTime()}
+        {status !== this.statuses.off && this.formatTime()}
         </div>
-        {status.off ? this.buttonRender('start') : this.buttonRender('stop')}
+        {status === this.statuses.off ? this.buttonRender('start') : this.buttonRender('stop')}
         <button className="btn btn-close" onClick={() => this.closeApp()}>X</button>
       </div>
     )
